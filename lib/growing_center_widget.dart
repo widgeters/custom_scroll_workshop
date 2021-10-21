@@ -21,7 +21,25 @@ class GrowingWhenCenteredRenderSliver extends RenderSliverSingleBoxAdapter {
     assert(this.constraints.axis == Axis.vertical);
 
     final SliverConstraints constraints = this.constraints;
-    child!.layout(constraints.asBoxConstraints(), parentUsesSize: true);
+    final BoxConstraints initialChildConstraints = constraints.asBoxConstraints();
+    child!.layout(initialChildConstraints, parentUsesSize: true);
+
+    final double initialChildExtent = child!.size.height;
+
+    final offsetFromTop =
+        (constraints.viewportMainAxisExtent - constraints.remainingPaintExtent - constraints.scrollOffset)
+            .clamp(-constraints.scrollOffset, constraints.viewportMainAxisExtent);
+
+    final relativeOffsetFromTop =
+        (offsetFromTop + constraints.scrollOffset) / (constraints.viewportMainAxisExtent + constraints.scrollOffset);
+
+    final childScale = 1 + Curves.easeInOutQuad.transform(1 - 2 * (0.5 - relativeOffsetFromTop).abs());
+
+    final resizedChildConstraints = initialChildConstraints.tighten(
+      height: initialChildExtent * childScale,
+    );
+
+    child!.layout(resizedChildConstraints, parentUsesSize: true);
 
     final double childExtent = child!.size.height;
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: childExtent);
