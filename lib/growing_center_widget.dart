@@ -52,6 +52,7 @@ class GrowingWhenCenteredRenderSliver extends RenderSliverSingleBoxAdapter {
       maxPaintExtent: childExtent,
       hitTestExtent: paintedChildSize,
       hasVisualOverflow: childExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+      layoutExtent: initialChildExtent.clamp(0, paintedChildSize),
     );
 
     setChildParentData(child!, constraints, geometry!);
