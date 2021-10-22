@@ -54,21 +54,49 @@ class ColoredBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.transparent,
-      clipBehavior: Clip.none,
-      alignment: Alignment.center,
-      child: LimitedBox(
-        maxHeight: 128,
-        child: Container(
-          clipBehavior: Clip.none,
-          padding: const EdgeInsets.all(16),
-          color: color,
-          alignment: Alignment.center,
-          child: Text(text),
+    return ContainerWithRotation(
+      child: Container(
+        color: Colors.transparent,
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        child: LimitedBox(
+          maxHeight: 128,
+          child: Container(
+            clipBehavior: Clip.none,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: color,
+            ),
+            alignment: Alignment.center,
+            child: Text(text),
+          ),
         ),
       ),
     );
+  }
+}
+
+class ContainerWithRotation extends SingleChildRenderObjectWidget {
+  ContainerWithRotation({required Widget child}) : super(child: child);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      RotatedChildRenderObject();
+}
+
+class RotatedChildRenderObject extends RenderProxyBox {
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (parentData is SliverPhysicalParentDataWithSkew) {
+      context.pushTransform(
+        child!.needsCompositing,
+        offset,
+        Matrix4.skewX((parentData as SliverPhysicalParentDataWithSkew).skew),
+        super.paint,
+      );
+    } else {
+      super.paint(context, offset);
+    }
   }
 }
 

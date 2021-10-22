@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -12,13 +14,16 @@ class GrowingWhenCentered extends SingleChildRenderObjectWidget {
 
 class GrowingWhenCenteredRenderSliver extends RenderSliverSingleBoxAdapter {
   @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! SliverPhysicalParentDataWithSkew) child.parentData = SliverPhysicalParentDataWithSkew();
+  }
+
+  @override
   void performLayout() {
     if (child == null) {
       geometry = SliverGeometry.zero;
       return;
     }
-
-    assert(this.constraints.axis == Axis.vertical);
 
     final SliverConstraints constraints = this.constraints;
     final BoxConstraints initialChildConstraints = constraints.asBoxConstraints();
@@ -39,6 +44,8 @@ class GrowingWhenCenteredRenderSliver extends RenderSliverSingleBoxAdapter {
       height: initialChildExtent * childScale,
     );
 
+    (child!.parentData as SliverPhysicalParentDataWithSkew).skew = (0.5 - relativeOffsetFromTop) * pi / 4;
+
     child!.layout(resizedChildConstraints, parentUsesSize: true);
 
     final double childExtent = child!.size.height;
@@ -57,4 +64,8 @@ class GrowingWhenCenteredRenderSliver extends RenderSliverSingleBoxAdapter {
 
     setChildParentData(child!, constraints, geometry!);
   }
+}
+
+class SliverPhysicalParentDataWithSkew extends SliverPhysicalParentData {
+  double skew = -pi / 6;
 }
